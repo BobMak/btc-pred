@@ -8,9 +8,15 @@ from datetime import datetime, timedelta
 
 ######################
 _SYMBOL = 'BTC-USD'
-_FILE_PATH = "../models/preprocessor.prec"
-MODEL_PATH = "../models/bigru/"
+FILE_PATH = "../models/preprocessor.prec"
+MODEL_PATH = "../models/bigru.keras"
 #######################
+
+
+
+def create_model(file_path):
+    model = tf.keras.models.load_model(file_path)
+    return model
 
 
 def read_preprocessor(file_path):
@@ -27,6 +33,7 @@ def read_preprocessor(file_path):
         return pickle.load(file)
 
 
+
 def load_btc_data(end_date):
     """
     Loads Bitcoin data from Yahoo Finance API based on the provided end date.
@@ -39,20 +46,17 @@ def load_btc_data(end_date):
     """
 
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
-
+    end_date = end_date + timedelta(days=1)
     start_date = (end_date - timedelta(days=15)).strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
+
     data = yf.download(tickers=_SYMBOL, interval='1d', start=start_date, end=end_date)
     data = data[["High", "Low", "Close"]]
 
     return data
 
 
-def create_model():
-    model = tf.keras.models.load_model("../models/bigru.keras")
-    return model
-
-def predict_future_values(model, initial_data, dates, num_predictions=7):
+def predict_future_values(model, processor, initial_data, dates, num_predictions):
     """
     Generates predictions for future values using a given model and initial data.
 
@@ -64,11 +68,12 @@ def predict_future_values(model, initial_data, dates, num_predictions=7):
 
     Returns:
         pandas.DataFrame: A DataFrame containing dates and predicted values.
+        :param model:
+        :param processor:
     """
 
     predictions = []
     predicted_dates = []
-    processor = read_preprocessor(_FILE_PATH)
 
     initial_data = processor.transform(initial_data)
 
@@ -106,12 +111,13 @@ def predict_future_values(model, initial_data, dates, num_predictions=7):
 
     }, index=predicted_dates)
 
+
     return predicted_df
 
 if __name__ == '__main__':
-    data = load_btc_data('2024-04-29')
-    model = create_model()
-
-    predictions = predict_future_values(model, data, data.index.tolist(), num_predictions=7)
+    data = load_btc_data('2024-04-30')
+    model = create_model(MODEL_PATH)
+    processor = read_preprocessor(FILE_PATH)
+    predictions = predict_future_values(model, processor, data, data.index.tolist(), num_predictions=6)
 
     print(predictions)
