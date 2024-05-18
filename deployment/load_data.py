@@ -15,8 +15,7 @@ MODEL_PATH = "models/bigru.keras"
 
 
 def create_model(file_path):
-    # model = tf.keras.models.load_model(file_path)
-    model = tf.keras.models.load_model("models/bigru.keras")
+    model = tf.keras.models.load_model(file_path)
     return model
 
 

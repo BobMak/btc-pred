@@ -1,3 +1,4 @@
+import argparse
 
 import pandas as pd
 import streamlit as st
@@ -6,7 +7,7 @@ from load_data import MODEL_PATH, FILE_PATH
 from load_data import load_btc_data, read_preprocessor, create_model
 from load_data import predict_future_values
 
-model = create_model(MODEL_PATH)
+model = None
 processor = read_preprocessor(FILE_PATH)
 
 
@@ -66,4 +67,9 @@ def create_app(num_predictions=7):
 
 
 if __name__ == '__main__':
+    args = argparse.ArgumentParser()
+    args.add_argument("model", default=MODEL_PATH)
+
+    args = args.parse_args()
+    model = create_model(args.model)
     create_app()
