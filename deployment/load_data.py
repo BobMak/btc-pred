@@ -5,17 +5,18 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
-
 ######################
 _SYMBOL = 'BTC-USD'
-FILE_PATH = "../models/preprocessor.prec"
-MODEL_PATH = "../models/bigru.keras"
+FILE_PATH = "models/preprocessor.prec"
+MODEL_PATH = "models/bigru.keras"
+
+
 #######################
 
 
-
 def create_model(file_path):
-    model = tf.keras.models.load_model(file_path)
+    # model = tf.keras.models.load_model(file_path)
+    model = tf.keras.models.load_model("models/bigru.keras")
     return model
 
 
@@ -33,7 +34,6 @@ def read_preprocessor(file_path):
         return pickle.load(file)
 
 
-
 def load_btc_data(end_date):
     """
     Loads Bitcoin data from Yahoo Finance API based on the provided end date.
@@ -46,7 +46,6 @@ def load_btc_data(end_date):
     """
 
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
-    end_date = end_date + timedelta(days=1)
     start_date = (end_date - timedelta(days=15)).strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
 
@@ -111,8 +110,8 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
 
     }, index=predicted_dates)
 
-
     return predicted_df
+
 
 if __name__ == '__main__':
     data = load_btc_data('2024-04-30')
