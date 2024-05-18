@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 ######################
 _SYMBOL = 'BTC-USD'
 FILE_PATH = "../models/preprocessor.prec"
-MODEL_PATH = "../models/bigru.keras"
+MODEL_PATH = "../models/model.keras"  # models/bigru
 #######################
 
 
