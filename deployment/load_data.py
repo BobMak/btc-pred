@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 ######################
 _SYMBOL = 'BTC-USD'
 FILE_PATH = "../models/preprocessor.prec"
-MODEL_PATH = "../models/model.keras"  # models/bigru
+MODEL_PATH = "../models/gru1.keras"
 #######################
 
 
@@ -19,15 +19,6 @@ def create_model(file_path):
 
 
 def read_preprocessor(file_path):
-    """
-    Reads a preprocessor object from a pickle file.
-
-    Parameters:
-        file_path (str): The path to the pickle file containing the preprocessor object.
-
-    Returns:
-        The preprocessor object loaded from the pickle file.
-    """
     with open(file_path, 'rb') as file:
         return pickle.load(file)
 
@@ -35,10 +26,8 @@ def read_preprocessor(file_path):
 def load_btc_data(end_date):
     """
     Loads Bitcoin data from Yahoo Finance API based on the provided end date.
-
     Parameters:
     end_date (str): The end date until which the Bitcoin data is to be fetched in the format '%Y-%m-%d'.
-
     Returns:
     pandas.DataFrame: A DataFrame containing the Bitcoin data for the specified time period.
     """
@@ -56,13 +45,11 @@ def load_btc_data(end_date):
 def predict_future_values(model, processor, initial_data, dates, num_predictions):
     """
     Generates predictions for future values using a given model and initial data.
-
     Parameters:
         model (object): The model to use for prediction.
         initial_data (list or numpy.ndarray): The initial data to use for prediction.
         dates (list of datetime): The dates corresponding to the initial data.
         num_predictions (int): The number of predictions to generate.
-
     Returns:
         pandas.DataFrame: A DataFrame containing dates and predicted values.
     """
