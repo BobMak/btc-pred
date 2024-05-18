@@ -50,7 +50,7 @@ def load_btc_data(end_date):
     end_date = end_date.strftime('%Y-%m-%d')
 
     data = yf.download(tickers=_SYMBOL, interval='1d', start=start_date, end=end_date)
-    data = data[["High", "Low", "Close"]]
+    data = data[["High", "Low", "Close", "Open"]]
 
     return data
 
