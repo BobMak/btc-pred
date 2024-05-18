@@ -68,8 +68,6 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
 
     Returns:
         pandas.DataFrame: A DataFrame containing dates and predicted values.
-        :param model:
-        :param processor:
     """
 
     predictions = []

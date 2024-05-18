@@ -1,5 +1,5 @@
 import streamlit as st
-import tensorflow as tf
+# import tensorflow as tf
 import pickle
 import numpy as np
 import pandas as pd
@@ -30,7 +30,7 @@ def create_app():
     if st.button("Predict"):
         predictions = predict_future_values(model, processor, data, data.index.tolist(), num_predictions=7)
 
-        st.write("Predictions:")
+        st.header("Predictions:")
         st.write(predictions)
 
         max_high = predictions['High'].max()
@@ -45,6 +45,13 @@ def create_app():
         st.write("Predicted Average Close: ", avg_close)
         st.write("Predicted Highest High day: ", max_high_index)
         st.write("Predicted Lowest Low day: ", min_low_index)
+
+        st.header("Swing Strategy")
+        sell_on = None if max_high_index == 6 else max_high_index
+        buy_on = None if min_low_index <= max_high_index else min_low_index
+
+        st.write("sell all: ", sell_on)
+        st.write("buy all: ", buy_on)
 
 
 if __name__ == '__main__':
