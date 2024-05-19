@@ -28,4 +28,4 @@ Will try to use the `gru1.keras` model by default, if you'd like to set a differ
 
 ## Live demo
 
-Deployed at: http://24.6.123.142:8501/
+Deployed at: http://cmpe257-group2.ddnsfree.com:8501/ (http://24.6.123.142:8501/)
