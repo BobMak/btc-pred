@@ -1,17 +1,18 @@
 import argparse
+import os
 
 import pandas as pd
 import streamlit as st
 from datetime import datetime, timedelta
-from load_data import MODEL_PATH, FILE_PATH
-from load_data import load_btc_data, read_preprocessor, create_model
-from load_data import predict_future_values
+from load_data import (MODEL_PATH, PREPROC_PATH, load_btc_data, read_preprocessor,
+                       create_model, predict_future_values)
+
 
 model = None
-processor = read_preprocessor(FILE_PATH)
+processor = read_preprocessor(PREPROC_PATH)
 
 
-def create_app(num_predictions=7):
+def create_app(num_predictions=7, window_size=15):
     st.title("Bitcoin Price Prediction")
 
     ## To ensure tha date other than current date is not selected
@@ -20,17 +21,16 @@ def create_app(num_predictions=7):
     last_predicted_date = today + timedelta(days=num_predictions)
     sel_date = date.strftime('%Y-%m-%d')
 
-
     st.write("You selected date: ", sel_date)
 
-    data = load_btc_data(sel_date)
+    data = load_btc_data(sel_date, window_size=window_size)
 
     # to ensure we'll load the bitcoin using that
-    openprices = data["Open"]
-    data = data.drop(columns=["Open"])
+    # openprices = data["Open"]
+    # data = data.drop(columns=["Open"])
 
     if st.button("Predict"):
-        predictions = predict_future_values(model, processor, data, data.index.tolist(), num_predictions=7)
+        predictions = predict_future_values(model, processor, data, data.index.tolist(), num_predictions=num_predictions)
 
         st.subheader("Predicted price(USD) for BitCoin for the next 7 days:")
 
@@ -67,9 +67,9 @@ def create_app(num_predictions=7):
 
 
 if __name__ == '__main__':
-    args = argparse.ArgumentParser()
-    args.add_argument("model", default=MODEL_PATH)
+    model_path = os.getenv("MODEL_PATH", MODEL_PATH)
+    predictions = os.getenv("PREDICTIONS", 7)
+    window_size = os.getenv("WINDOW_SIZE", 15)
 
-    args = args.parse_args()
-    model = create_model(args.model)
-    create_app()
+    model = create_model(model_path)
+    create_app(predictions, window_size)

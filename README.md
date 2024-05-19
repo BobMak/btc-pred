@@ -17,6 +17,8 @@ Use `notebooks/Data Modelling.ipynb` to pre-process the data and train the model
 
 we are using streamlit for user interface. 
 Run the `streamlit run deployment/deploy.py` to start the ui with the model.
+Will try to use the `gru1.keras` model by default, if you'd like to set a different model, set the path as an environment variable:
+`MODEL_PATH=models/gru1.keras streamlit run deployment/deploy.py`
 
 ## Live demo
 

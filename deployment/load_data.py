@@ -7,10 +7,9 @@ from datetime import datetime, timedelta
 
 ######################
 _SYMBOL = 'BTC-USD'
-FILE_PATH = "../models/preprocessor.prec"
-MODEL_PATH = "../models/gru1.keras"
+PREPROC_PATH = "models/preprocessor.prec"
+MODEL_PATH = "models/gru1.keras"
 #######################
-
 
 
 def create_model(file_path):
@@ -23,7 +22,7 @@ def read_preprocessor(file_path):
         return pickle.load(file)
 
 
-def load_btc_data(end_date):
+def load_btc_data(end_date, window_size=15):
     """
     Loads Bitcoin data from Yahoo Finance API based on the provided end date.
     Parameters:
@@ -33,11 +32,11 @@ def load_btc_data(end_date):
     """
 
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
-    start_date = (end_date - timedelta(days=15)).strftime('%Y-%m-%d')
+    start_date = (end_date - timedelta(days=window_size)).strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
 
     data = yf.download(tickers=_SYMBOL, interval='1d', start=start_date, end=end_date)
-    data = data[["High", "Low", "Close", "Open"]]
+    data = data[["High", "Low", "Close"]]  # "Open"
 
     return data
 
@@ -90,7 +89,6 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
         'High': predictions[:, 0],
         "Low": predictions[:, 1],
         "Close": predictions[:, 2],
-
     }, index=predicted_dates)
 
     return predicted_df
@@ -99,7 +97,7 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
 if __name__ == '__main__':
     data = load_btc_data('2024-04-30')
     model = create_model(MODEL_PATH)
-    processor = read_preprocessor(FILE_PATH)
+    processor = read_preprocessor(PREPROC_PATH)
     predictions = predict_future_values(model, processor, data, data.index.tolist(), num_predictions=6)
 
     print(predictions)
