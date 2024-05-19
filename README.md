@@ -2,7 +2,7 @@
 # BitSmart
 
 CMPE 257 Project, by Group 2:
-Alexander Iakovlev (014375218), Pratik Korat (017512508), Volodymyr Makarenko (014339546)
+Alexander Iakovlev, Pratik Korat, Volodymyr Makarenko
 
 ## Installation
 
