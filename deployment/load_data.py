@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 ######################
 _SYMBOL = 'BTC-USD'
 PREPROC_PATH = "models/preprocessor.prec"
-MODEL_PATH = "models/gru1.keras"
+MODEL_PATH = "models/gru32b.keras"
 #######################
 
 
@@ -36,7 +36,7 @@ def load_btc_data(end_date, window_size=15):
     end_date = end_date.strftime('%Y-%m-%d')
 
     data = yf.download(tickers=_SYMBOL, interval='1d', start=start_date, end=end_date)
-    data = data[["High", "Low", "Close"]]  # "Open"
+    data = data[["High", "Low", "Close", "Open", "Volume"]]  # "Open"
 
     return data
 
@@ -89,6 +89,7 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
         'High': predictions[:, 0],
         "Low": predictions[:, 1],
         "Close": predictions[:, 2],
+        "Open": predictions[:, 3],
     }, index=predicted_dates)
 
     return predicted_df

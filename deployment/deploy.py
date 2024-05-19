@@ -53,6 +53,7 @@ def create_app(num_predictions=7, window_size=15):
 
         if max_high_index < min_low_index:
             sell_date = max_high_index
+            print(f"min_low_index {min_low_index}, last_predicted_date {last_predicted_date}")
             load_date = min_low_index if min_low_index != last_predicted_date else None
             # He bought? Dump it
         elif max_high_index == today and min_low_index != today:
@@ -64,6 +65,11 @@ def create_app(num_predictions=7, window_size=15):
 
         sell_data = pd.DataFrame(data={"Strategy": [sell_date, load_date]}, index=["Sell Date", "Load Date"])
         st.dataframe(sell_data)
+
+        # find mean square error
+        # real_data = data.loc[predictions.index]
+        # mse = ((real_data - predictions) ** 2).mean()
+        # st.write(f"Mean Square Error: {mse}")
 
 
 if __name__ == '__main__':
