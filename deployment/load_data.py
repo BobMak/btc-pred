@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 ######################
 _SYMBOL = 'BTC-USD'
 PREPROC_PATH = "models/preprocessor.prec"
-MODEL_PATH = "models/gru32.keras"
+MODEL_PATH = "models/gru32b.keras"
 #######################
 
 
