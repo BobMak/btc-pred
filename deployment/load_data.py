@@ -1,3 +1,6 @@
+import os
+
+import streamlit
 import yfinance as yf
 import tensorflow as tf
 import pickle
@@ -11,10 +14,19 @@ PREPROC_PATH = "models/preprocessor.prec"
 MODEL_PATH = "models/gru32b.keras"
 #######################
 
-
-def create_model(file_path):
-    model = tf.keras.models.load_model(file_path)
-    return model
+@streamlit.cache_resource(hash_funcs={tf.keras.models.Model: id})
+def load_models(file_path):
+    model_name = file_path.split("/")[-1].split(".")[0]
+    model_dir = "/".join(file_path.split("/")[:-1])
+    model_names = os.listdir(model_dir)
+    models_names = [m for m in model_names if model_name in m]
+    model_paths = [os.path.join(model_dir, m) for m in models_names]
+    models = []
+    for model_path in model_paths:
+        model = tf.keras.models.load_model(model_path)
+        models.append(model)
+    print(f"loaded {models_names}")
+    return models
 
 
 def read_preprocessor(file_path):
@@ -41,11 +53,11 @@ def load_btc_data(end_date, window_size=15):
     return data
 
 
-def predict_future_values(model, processor, initial_data, dates, num_predictions):
+def predict_future_values(models, processor, initial_data, dates, num_predictions):
     """
     Generates predictions for future values using a given model and initial data.
     Parameters:
-        model (object): The model to use for prediction.
+        models (list of objects): The model to use for prediction.
         initial_data (list or numpy.ndarray): The initial data to use for prediction.
         dates (list of datetime): The dates corresponding to the initial data.
         num_predictions (int): The number of predictions to generate.
@@ -54,6 +66,7 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
     """
 
     predictions = []
+    predictions_stds = []
     predicted_dates = []
 
     initial_data = processor.transform(initial_data)
@@ -65,13 +78,20 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
 
     for _ in range(num_predictions):
         # Predict next value based on initial data
-        prediction = model.predict(initial_data)
-
+        predictions_ = []
+        # mixture of couch experts
+        for model in models:
+            prediction = model.predict(initial_data)
+            predictions_.append(prediction)
+        predictions_mean = np.mean(predictions_, axis=0)
+        predictions_std = np.std(processor.inverse_transform(np.array(predictions_).squeeze()), axis=0)
+        print(_, predictions_mean.shape)
         # Append the predicted value to initial data for next prediction
-        initial_data = np.concatenate((initial_data[:, 1:], np.expand_dims(prediction, axis=1)), axis=1)
+        initial_data = np.concatenate((initial_data[:, 1:], np.expand_dims(predictions_mean, axis=1)), axis=1)
 
         # Append the prediction to the list of predictions
-        predictions.append(np.squeeze(prediction).tolist())
+        predictions.append(np.squeeze(predictions_mean).tolist())
+        predictions_stds.append(np.squeeze(predictions_std).tolist())
 
         # Generate date object for the predicted value
         last_date = dates[-1]
@@ -83,6 +103,8 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
 
     predictions = np.array(predictions)
     predictions = processor.inverse_transform(predictions)
+    predictions_std = np.array(predictions_stds)
+    # predictions_std = processor.inverse_transform(predictions_std)
 
     # Create DataFrame with dates and predicted values
     predicted_df = pd.DataFrame({
@@ -90,6 +112,7 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
         "Low": predictions[:, 1],
         "Close": predictions[:, 2],
         "Open": predictions[:, 3],
+        "openstd": predictions_std[:, 3]
     }, index=predicted_dates)
 
     return predicted_df
@@ -97,8 +120,8 @@ def predict_future_values(model, processor, initial_data, dates, num_predictions
 
 if __name__ == '__main__':
     data = load_btc_data('2024-04-30')
-    model = create_model(MODEL_PATH)
+    models = load_models(MODEL_PATH)
     processor = read_preprocessor(PREPROC_PATH)
-    predictions = predict_future_values(model, processor, data, data.index.tolist(), num_predictions=6)
+    predictions = predict_future_values(models, processor, data, data.index.tolist(), num_predictions=6)
 
     print(predictions)
